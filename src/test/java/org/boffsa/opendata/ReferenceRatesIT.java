@@ -1,5 +1,6 @@
 package org.boffsa.opendata;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class ReferenceRatesIT {
 						})
 				.getBody();
 		assertEquals(32, exchangeRateInfos.size());
+		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
 	}
 
 	@Test
