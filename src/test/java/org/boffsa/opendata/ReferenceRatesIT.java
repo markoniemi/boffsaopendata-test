@@ -12,7 +12,6 @@ import org.boffsa.opendata.dto.ExchangeRateInfo;
 import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -40,10 +39,9 @@ public class ReferenceRatesIT {
 	public void testRestTemplateWithCustomStringMessageConverter()
 			throws JsonParseException, JsonMappingException, IOException {
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setMessageConverters(
-				Arrays.asList(new FixedCharsetMessageConverter(StandardCharsets.UTF_16LE)));
-		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, null, String.class);
-		List<ExchangeRateInfo> exchangeRateInfos = parse(response.getBody());
+		restTemplate.setMessageConverters(Arrays.asList(new FixedCharsetMessageConverter(StandardCharsets.UTF_16LE)));
+		String data = restTemplate.exchange(URL, HttpMethod.GET, null, String.class).getBody();
+		List<ExchangeRateInfo> exchangeRateInfos = parse(data);
 		assertEquals(32, exchangeRateInfos.size());
 		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
 	}
@@ -51,16 +49,14 @@ public class ReferenceRatesIT {
 	@Test
 	public void testRestTemplateWithByteArray() throws JsonParseException, JsonMappingException, IOException {
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<byte[]> response = restTemplate.exchange(URL, HttpMethod.GET, null, byte[].class);
-		List<ExchangeRateInfo> exchangeRateInfos = parse(new String(response.getBody(), StandardCharsets.UTF_16LE));
+		byte[] data = restTemplate.exchange(URL, HttpMethod.GET, null, byte[].class).getBody();
+		List<ExchangeRateInfo> exchangeRateInfos = parse(new String(data, StandardCharsets.UTF_16LE));
 		assertEquals(32, exchangeRateInfos.size());
 	}
 
-
-	public static List<ExchangeRateInfo> parse(String json) throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
-//		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		return objectMapper.readValue(json.getBytes(), new TypeReference<List<ExchangeRateInfo>>() {
+	public static List<ExchangeRateInfo> parse(String json)
+			throws JsonParseException, JsonMappingException, IOException {
+		return new ObjectMapper().readValue(json.getBytes(), new TypeReference<List<ExchangeRateInfo>>() {
 		});
 	}
 }
