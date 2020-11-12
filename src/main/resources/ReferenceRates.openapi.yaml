@@ -1,0 +1,133 @@
+openapi: 3.0.1
+info:
+  title: Reference Rates
+  description: 'The exchange rates are euro reference rates published by the European central bank. The reference rates are published daily at about 5 PM Finnish time, when the TARGET system is open. The reference rates are published for the information of the public and different institutions but not as a basis for trade.'
+  version: v2
+servers:
+  - url: https://api.boffsaopendata.fi/referencerates/v2
+paths:
+  /api/V2:
+    get:
+      tags:
+        - ExchangeRate
+      summary: Get exchange rates v2.
+      description: Get exchange rates. Changes to response formating.
+      operationId: ExchangeRate_Get
+      parameters:
+        - name: type
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: ''
+          schema:
+            type: string
+        - name: currencies
+          in: query
+          description: 'Currencies to return (e.g. "GBP,JPY,SEK"). Leave empty to return all.'
+          schema:
+            type: string
+        - name: includeNonECBPublCur
+          in: query
+          description: ''
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateInfoArray'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateInfoArray'
+            text/html:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateInfoArray'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateInfoArray'
+            text/xml:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateInfoArray'
+        '404':
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiExchangeRateGet404ApplicationJsonResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiExchangeRateGet404TextJsonResponse'
+            text/html:
+              schema:
+                $ref: '#/components/schemas/ApiExchangeRateGet404TextHtmlResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiExchangeRateGet404ApplicationXmlResponse'
+            text/xml:
+              schema:
+                $ref: '#/components/schemas/ApiExchangeRateGet404TextXmlResponse'
+components:
+  schemas:
+    ExchangeRateInfo:
+      type: object
+      properties:
+        ExchangeRates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservationRate'
+        Currency:
+          type: string
+        CurrencyDenom:
+          type: string
+        CurrencyNameFi:
+          type: string
+        CurrencyNameSe:
+          type: string
+        CurrencyNameEn:
+          type: string
+        ECBPublished:
+          type: string
+    ObservationRate:
+      type: object
+      properties:
+        ObservationDate:
+          type: string
+        Value:
+          type: number
+          format: double
+    ExchangeRateInfoArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExchangeRateInfo'
+    ApiExchangeRateGet404ApplicationJsonResponse:
+      type: string
+    ApiExchangeRateGet404TextJsonResponse:
+      type: string
+    ApiExchangeRateGet404TextHtmlResponse:
+      type: string
+    ApiExchangeRateGet404ApplicationXmlResponse:
+      type: string
+    ApiExchangeRateGet404TextXmlResponse:
+      type: string
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
