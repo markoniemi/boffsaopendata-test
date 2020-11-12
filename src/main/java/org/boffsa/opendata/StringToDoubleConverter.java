@@ -1,4 +1,4 @@
-package org.boffsa.opendata.dto;
+package org.boffsa.opendata;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 

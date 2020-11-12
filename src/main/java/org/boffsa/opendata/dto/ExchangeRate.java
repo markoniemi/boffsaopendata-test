@@ -1,5 +1,7 @@
 package org.boffsa.opendata.dto;
 
+import org.boffsa.opendata.StringToDoubleConverter;
+
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 

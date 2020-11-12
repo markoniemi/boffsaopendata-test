@@ -20,20 +20,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.extern.log4j.Log4j2;
-
-@Log4j2
 public class ReferenceRatesIT {
+	private static final String URL = "https://api.boffsaopendata.fi/referencerates/v2/api/V2";
+
 	@Test
 	public void testRestTemplateWithCustomMessageConverter()
 			throws JsonParseException, JsonMappingException, IOException {
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setMessageConverters(Arrays.asList(new Utf16Jackson2HttpMessageConverter()));
+		restTemplate.setMessageConverters(
+				Arrays.asList(new FixedCharsetJackson2HttpMessageConverter(StandardCharsets.UTF_16LE)));
 		List<ExchangeRateInfo> exchangeRateInfos = restTemplate
-				.exchange("https://api.boffsaopendata.fi/referencerates/v2/api/V2", HttpMethod.GET, null,
-						new ParameterizedTypeReference<List<ExchangeRateInfo>>() {
-						})
-				.getBody();
+				.exchange(URL, HttpMethod.GET, null, new ParameterizedTypeReference<List<ExchangeRateInfo>>() {
+				}).getBody();
 		assertEquals(32, exchangeRateInfos.size());
 		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
 	}
@@ -42,30 +40,24 @@ public class ReferenceRatesIT {
 	public void testRestTemplateWithCustomStringMessageConverter()
 			throws JsonParseException, JsonMappingException, IOException {
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setMessageConverters(Arrays.asList(new Utf16HttpMessageConverter()));
-		ResponseEntity<String> response = restTemplate
-				.exchange("https://api.boffsaopendata.fi/referencerates/v2/api/V2", HttpMethod.GET, null, String.class);
-		String json = response.getBody();
-		log.trace(json);
-		List<ExchangeRateInfo> exchangeRateInfos = parse(json);
-		exchangeRateInfos.forEach(exchangeRateInfo -> {
-			log.debug(exchangeRateInfo);
-		});
+		restTemplate.setMessageConverters(
+				Arrays.asList(new FixedCharsetMessageConverter(StandardCharsets.UTF_16LE)));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, null, String.class);
+		List<ExchangeRateInfo> exchangeRateInfos = parse(response.getBody());
 		assertEquals(32, exchangeRateInfos.size());
+		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
 	}
 
 	@Test
 	public void testRestTemplateWithByteArray() throws JsonParseException, JsonMappingException, IOException {
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<byte[]> response = restTemplate
-				.exchange("https://api.boffsaopendata.fi/referencerates/v2/api/V2", HttpMethod.GET, null, byte[].class);
-		String json = new String(response.getBody(), StandardCharsets.UTF_16LE);
-		log.trace(json);
-		List<ExchangeRateInfo> exchangeRateInfos = parse(json);
+		ResponseEntity<byte[]> response = restTemplate.exchange(URL, HttpMethod.GET, null, byte[].class);
+		List<ExchangeRateInfo> exchangeRateInfos = parse(new String(response.getBody(), StandardCharsets.UTF_16LE));
 		assertEquals(32, exchangeRateInfos.size());
 	}
 
-	private List<ExchangeRateInfo> parse(String json) throws JsonParseException, JsonMappingException, IOException {
+
+	public static List<ExchangeRateInfo> parse(String json) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 //		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		return objectMapper.readValue(json.getBytes(), new TypeReference<List<ExchangeRateInfo>>() {

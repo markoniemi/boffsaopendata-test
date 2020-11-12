@@ -1,8 +1,11 @@
 package org.boffsa.opendata;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.boffsa.opendata.ReferenceRatesIT.parse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -38,18 +41,24 @@ import lombok.extern.log4j.Log4j2;
 public class ReferenceRatesFeignIT {
 	@Resource
 	ReferenceRates referenceRates;
+
 	@Test
-	public void testFeignClient() throws JsonParseException, JsonMappingException, IOException {
-//		byte[] data = referenceRates.findAll();
-//		String json = new String(data, StandardCharsets.UTF_16LE);
-//		String json = referenceRates.findAll();
-//		log.trace(json);
-//		List<ExchangeRateInfo> exchangeRateInfos = parse(json);
+	public void findAll() throws JsonParseException, JsonMappingException, IOException {
 		List<ExchangeRateInfo> exchangeRateInfos = referenceRates.findAll();
 		exchangeRateInfos.forEach(exchangeRateInfo -> {
 			log.debug(exchangeRateInfo);
 		});
 		assertEquals(32, exchangeRateInfos.size());
+		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
 	}
 
+	@Test
+	public void findAllAsByteArray() throws JsonParseException, JsonMappingException, IOException {
+		byte[] data = referenceRates.findAllAsByteArray();
+		String json = new String(data, StandardCharsets.UTF_16LE);
+		log.trace(json);
+		List<ExchangeRateInfo> exchangeRateInfos = parse(json);
+		assertEquals(32, exchangeRateInfos.size());
+		assertNotNull(exchangeRateInfos.get(0).getExchangeRates().get(0).getValue());
+	}
 }
